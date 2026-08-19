@@ -12,6 +12,14 @@ plan or tenant concept anywhere. Read "the owner" in older comments as "the sign
 Express + `pg` (no ORM) on the back, React + Vite + Recharts on the front, one repo, one process.
 `server/index.js` serves the API and the built client out of `dist/`.
 
+**Native shells.** `ios/` and `android/` are Capacitor wrappers around the same client — added for
+App Store / Play Store distribution, not a separate app. `capacitor.config.json` has no `server.url`
+by default, which means an unconfigured build embeds `dist/` locally; before shipping, set
+`server.url` to the deployed Railway domain so the WebView loads the real site instead. That's not
+optional: auth is a same-origin httpOnly cookie and `client/src/api.js` calls relative `/api/...`
+URLs, so a locally-bundled `dist/` has no origin to send that cookie to and every request 404s.
+Run `npm run cap:sync` after any client build to refresh both native projects.
+
 ## Conventions that matter
 
 **Database.** No migration tool. `db/schema.sql` is re-run on every boot, so every statement must

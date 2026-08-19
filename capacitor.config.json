@@ -1,0 +1,9 @@
+{
+  "appId": "app.khata.mobile",
+  "appName": "Khata",
+  "webDir": "dist",
+  "_comment_server_url": "This app is one Express process serving the API and dist/ from the same origin — auth is a same-origin httpOnly cookie and client/src/api.js calls relative '/api/...' URLs. Bundling a local copy of dist/ into the native shell would break both. Instead, once you have a Railway (or custom) domain, add a top-level \"server\": { \"url\": \"https://your-domain\", \"cleartext\": false } block here so the native WebView loads the real deployed site, the same way a browser would. Do this before `npx cap sync` for a build you intend to ship.",
+  "android": {
+    "allowMixedContent": false
+  }
+}
