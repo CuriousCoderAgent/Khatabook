@@ -20,6 +20,17 @@ optional: auth is a same-origin httpOnly cookie and `client/src/api.js` calls re
 URLs, so a locally-bundled `dist/` has no origin to send that cookie to and every request 404s.
 Run `npm run cap:sync` after any client build to refresh both native projects.
 
+**SMS auto-capture (Android only).** `android/.../SmsReceiver.java` listens for bank alerts in the
+background and forwards them to `POST /api/import/sms/device`, which runs the same
+extract-then-classify pipeline as pasting a message by hand (`/api/import/sms`) and files the result
+straight into the ledger — see `server/routes/devices.js`. It authenticates with a `device_tokens`
+bearer token instead of the session cookie, because a broadcast receiver has no WebView to hold that
+cookie; `SmsCapturePlugin.java` + `client/src/lib/smsCapture.js` are what let Settings issue one and
+hand it to the OS permission flow. iOS has no equivalent — Apple gives no app access to the SMS
+inbox — so this stays Android-only until a share-intent flow is built for iOS. Before a release
+build, `android/app/src/main/res/values/strings.xml`'s `khata_api_base_url` needs the same deployed
+domain as `capacitor.config.json`'s `server.url`, or the background listener has nowhere to POST to.
+
 ## Conventions that matter
 
 **Database.** No migration tool. `db/schema.sql` is re-run on every boot, so every statement must

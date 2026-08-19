@@ -4,4 +4,10 @@
     <string name="title_activity_main">Khata</string>
     <string name="package_name">app.khata.mobile</string>
     <string name="custom_url_scheme">app.khata.mobile</string>
+
+    <!-- The SMS listener runs from a broadcast receiver, outside the WebView,
+         so it has no capacitor.config.json server.url to read at runtime —
+         set this to the same deployed Railway domain before a release build,
+         or SmsForwardWorker has nowhere to POST captured alerts. -->
+    <string name="khata_api_base_url">https://REPLACE_WITH_YOUR_RAILWAY_DOMAIN</string>
 </resources>

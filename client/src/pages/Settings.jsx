@@ -1,12 +1,34 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api, inr } from "../api.js";
 import { Field, useCats } from "../ui.jsx";
+import { isAndroidNative, enableSmsCapture } from "../lib/smsCapture.js";
 
 export default function Settings({ tx, refData, refresh, say, user }) {
   const C = useCats();
   const [acct, setAcct] = useState({ name: "", kind: "bank" });
   const [pwEdit, setPwEdit] = useState({}); // { [accountId]: draft password }
   const [mem, setMem] = useState({ pattern: "", category: "misc", subcategory: "", scope: "personal" });
+  const [devices, setDevices] = useState([]);
+  const [linking, setLinking] = useState(false);
+
+  const loadDevices = () => api.get("/device-tokens").then(setDevices).catch(() => {});
+  useEffect(() => { loadDevices(); }, []);
+
+  async function linkThisPhone() {
+    setLinking(true);
+    try {
+      const created = await api.post("/device-tokens", { label: "Android phone", platform: "android" });
+      await enableSmsCapture(created.token);
+      await loadDevices();
+      say("SMS auto-capture turned on for this phone.");
+    } catch (e) { say(e.message); }
+    finally { setLinking(false); }
+  }
+
+  async function revokeDevice(id) {
+    if (!confirm("Stop auto-capture on this device? It can be re-linked from the phone any time.")) return;
+    try { await api.del(`/device-tokens/${id}`); await loadDevices(); } catch (e) { say(e.message); }
+  }
 
   const exportCsv = () => {
     const head = "date,description,category,subcategory,scope,direction,amount,account,reimbursement,note\n";
@@ -100,6 +122,38 @@ export default function Settings({ tx, refData, refresh, say, user }) {
               <span className="faint" style={{ fontSize: 12, minWidth: 60 }}>{p.relation || ""}</span>
             </div>
           ))}
+        </div>
+
+        <div className="card">
+          <h3 className="h3">SMS auto-capture</h3>
+          <p className="muted" style={{ fontSize: 13 }}>
+            {isAndroidNative()
+              ? "Reads bank alerts off this phone the moment they arrive and files them automatically — no pasting."
+              : "Android-only for now: Apple doesn't let any app read the SMS inbox. On the browser or on iOS, use the paste-SMS box on the Import tab instead."}
+          </p>
+          {isAndroidNative() && (
+            <button className="btn" data-v="primary" disabled={linking} onClick={linkThisPhone}>
+              {linking ? "Linking…" : "Turn on for this phone"}
+            </button>
+          )}
+          {devices.length > 0 && (
+            <>
+              <hr className="hr" />
+              {devices.map(d => (
+                <div key={d.id} className="row" style={{ justifyContent: "space-between", padding: "3px 0", borderBottom: "1px solid var(--rule2)" }}>
+                  <span style={{ fontSize: 13 }}>
+                    {d.label || d.platform} <span className="chip">{d.platform}</span>
+                  </span>
+                  <div className="row" style={{ gap: 5 }}>
+                    <span className="faint" style={{ fontSize: 11.5 }}>
+                      {d.lastUsedAt ? `last used ${String(d.lastUsedAt).slice(0, 10)}` : "never used"}
+                    </span>
+                    <button className="btn sm" data-v="danger" onClick={() => revokeDevice(d.id)}>×</button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
         </div>
 
         <div className="card">

@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from "node:crypto";
 import { q, seedUser } from "./db.js";
 
 const SECRET = process.env.JWT_SECRET || "change-me-in-env";
@@ -29,6 +30,29 @@ export function requireAuth(req, res, next) {
   } catch {
     res.status(401).json({ error: "Session expired. Sign in again." });
   }
+}
+
+/**
+ * Bearer-token auth for the SMS listener running natively on Android, outside
+ * the WebView and its cookie. A device token is a 256-bit random string shown
+ * to the user once, at issue time, then never again — only its sha256 is kept.
+ */
+const hashToken = token => crypto.createHash("sha256").update(token).digest("hex");
+
+export function generateDeviceToken() {
+  const token = "kdt_" + crypto.randomBytes(32).toString("hex");
+  return { token, hash: hashToken(token) };
+}
+
+export async function requireDeviceToken(req, res, next) {
+  const header = req.headers.authorization || "";
+  const token = header.startsWith("Bearer ") ? header.slice(7).trim() : null;
+  if (!token) return res.status(401).json({ error: "Missing device token." });
+  const { rows } = await q("SELECT id, user_id FROM device_tokens WHERE token_hash=$1", [hashToken(token)]);
+  if (!rows.length) return res.status(401).json({ error: "Unknown or revoked device token." });
+  req.user = { uid: rows[0].user_id };
+  q("UPDATE device_tokens SET last_used_at=now() WHERE id=$1", [rows[0].id]).catch(() => {});
+  next();
 }
 
 export async function signup(email, password, name) {

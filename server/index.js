@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { migrate, q } from "./db.js";
 import { issue, clear, requireAuth, signup, login } from "./auth.js";
 import api from "./routes/api.js";
+import devices from "./routes/devices.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
@@ -52,6 +53,7 @@ app.get("/api/auth/status", async (_req, res) => {
   res.json({ needsFirstUser: rows[0].n === 0, signupEnabled: process.env.SIGNUP_ENABLED === "true" });
 });
 
+app.use("/api", devices);
 app.use("/api", api);
 
 /* ------------------------------ static site ---------------------------- */

@@ -33,9 +33,27 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- android:permission restricts who may deliver this broadcast to the
+             OS's own telephony stack, so no other app can forge a fake alert
+             into it. Does nothing at all unless SmsPrefs.isEnabled() — the
+             user turns this on explicitly from Settings. -->
+        <receiver
+            android:name=".SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
     </application>
 
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- Sensitive permission under Play Store's SMS/Call Log policy — declared
+         for the single, disclosed purpose of auto-filing bank transaction
+         alerts, off by default until the user opts in from Settings. -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 </manifest>

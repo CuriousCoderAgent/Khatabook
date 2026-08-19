@@ -7,6 +7,7 @@ import { CATEGORIES, normaliseMerchant } from "../lib/taxonomy.js";
 import { extractPdfTable } from "../lib/pdfImport.js";
 import { extractTransactions, extractTotals, extractFromSms, reconcile, extractEnabled } from "../lib/statementExtract.js";
 import { encrypt, decrypt } from "../lib/secret.js";
+import { INSERT_TX, principalOf, fingerprint } from "../lib/transactions.js";
 
 const r = Router();
 r.use(requireAuth);
@@ -97,24 +98,6 @@ r.get("/transactions", wrap(async (req, res) => {
   const { rows } = await q(sql, params);
   res.json(rows.map(txShape));
 }));
-
-const INSERT_TX = `
-  INSERT INTO transactions
-    (user_id, txn_date, description, amount, direction, category, subcategory, scope,
-     account_id, reimb, person_id, note, source, batch_id, fingerprint, ai_confidence, ai_reason,
-     principal)
-  VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
-  RETURNING *`;
-
-/** Principal is only meaningful on a home loan EMI, and only up to the EMI. */
-const principalOf = t => {
-  if (t.cat !== "home_loan" || t.principal == null || t.principal === "") return null;
-  const p = Math.abs(Number(t.principal));
-  return isFinite(p) ? Math.min(p, Math.abs(Number(t.amount))) : null;
-};
-
-const fingerprint = t =>
-  `${t.date}|${Math.round(Number(t.amount) * 100)}|${String(t.desc || "").toLowerCase().replace(/\s+/g, "").slice(0, 24)}`;
 
 r.post("/transactions", wrap(async (req, res) => {
   const t = req.body;

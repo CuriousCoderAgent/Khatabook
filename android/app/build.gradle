@@ -40,6 +40,13 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+
+    // SMS auto-capture (SmsReceiver + SmsCapturePlugin): WorkManager defers the
+    // network POST off the broadcast receiver, which the OS kills a few seconds
+    // after onReceive() returns, and retries it once connectivity comes back.
+    // security-crypto keeps the device's bearer token off disk in plaintext.
+    implementation "androidx.work:work-runtime:2.10.0"
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
 }
 
 apply from: 'capacitor.build.gradle'

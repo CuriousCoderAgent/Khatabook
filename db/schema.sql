@@ -170,3 +170,19 @@ CREATE INDEX IF NOT EXISTS sales_holding ON sales (holding_id, sell_date);
 -- yet, in which case the whole EMI is treated as going into the asset — which
 -- flatters the figure, so the UI says so wherever it does it.
 ALTER TABLE transactions ADD COLUMN IF NOT EXISTS principal NUMERIC(14,2);
+
+-- A device token stands in for the login cookie on a phone that isn't holding
+-- one — the Android SMS listener runs from a broadcast receiver, not the
+-- WebView, so it has no session to send. token_hash is sha256 of a random
+-- 32-byte token; only the hash is ever stored, the same way a password would
+-- be, so a database leak doesn't hand out working credentials.
+CREATE TABLE IF NOT EXISTS device_tokens (
+  id           SERIAL PRIMARY KEY,
+  user_id      INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash   TEXT NOT NULL UNIQUE,
+  label        TEXT,
+  platform     TEXT NOT NULL DEFAULT 'android',
+  last_used_at TIMESTAMPTZ,
+  created_at   TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS device_tokens_user ON device_tokens (user_id);
