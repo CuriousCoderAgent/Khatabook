@@ -1,0 +1,213 @@
+:root {
+  --paper:#F3F6EF; --bar:#E2EDDC; --card:#FBFCF8;
+  --ink:#14231A; --ink2:#53645A; --ink3:#8B9A90;
+  --rule:#C4D2C0; --rule2:#DCE6D8;
+  --in:#1C6A49; --out:#A6342A; --gold:#B0851E; --blue:#2F6480;
+  --mono:'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  --sans:'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --cond:'IBM Plex Sans Condensed', 'IBM Plex Sans', system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0; font-family: var(--sans); font-size: 14px; line-height: 1.45;
+  color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased;
+  /* Stops iOS resizing body text of its own accord when the device rotates. */
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+}
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--blue); }
+
+.shell { display: flex; align-items: flex-start; }
+.side {
+  width: 210px; flex: 0 0 210px; position: sticky; top: 0; height: 100vh;
+  border-right: 1px solid var(--rule); background: var(--card);
+  padding: 18px 0 10px; overflow-y: auto; display: flex; flex-direction: column;
+}
+.main { flex: 1; min-width: 0; padding: 22px 26px 80px; }
+/* Cap the reading width. Left to fill an iPad in landscape, a table of eleven
+   sales spreads its columns so far apart that following a row across the screen
+   takes real effort, and every page reflows as the window changes. */
+.main > * { max-width: 1180px; margin-inline: auto; }
+/* The top bar and the sheet are the small-screen navigation; the sidebar is the
+   wide-screen one. Exactly one of the two is ever on screen. */
+.topbar { display: none; }
+.sheet-scrim { display: none; }
+
+@media (max-width: 900px) {
+  .shell { display: block; }
+  .side { display: none; }
+  .main { padding: 14px 14px 88px; }
+
+  .topbar {
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 30;
+    background: var(--card); border-bottom: 1px solid var(--rule);
+    padding: 8px 12px; padding-top: max(8px, env(safe-area-inset-top));
+  }
+  .topbar-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .topbar-title b { font-family: var(--cond); font-size: 17px; letter-spacing: .04em;
+    text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* 44px square: the smallest target that stays reliable under a thumb. */
+  .menubtn { width: 44px; height: 44px; flex: 0 0 44px; display: grid; place-items: center;
+    background: none; border: 1px solid var(--rule); border-radius: 4px; }
+  .menubtn:active { background: var(--bar); }
+  .menubtn-icon { display: grid; gap: 4px; }
+  .menubtn-icon i { display: block; width: 18px; height: 2px; background: var(--ink); }
+
+  .sheet-scrim { display: block; position: fixed; inset: 0; z-index: 40;
+    background: rgba(20, 35, 26, .38); }
+  .sheet { position: absolute; inset: 0 auto 0 0; width: min(82vw, 320px);
+    background: var(--card); border-right: 1px solid var(--rule);
+    display: flex; flex-direction: column; overflow-y: auto;
+    padding-top: env(safe-area-inset-top); animation: sheetIn .16s ease-out; }
+  .sheet-head { display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 10px; padding: 14px 16px 12px; border-bottom: 1px solid var(--rule); }
+  .sheet-head h1 { font-family: var(--cond); font-size: 21px; margin: 0; font-weight: 700; }
+  .sheet-head p { margin: 2px 0 0; font-size: 11.5px; color: var(--ink3); word-break: break-all; }
+  .sheetbtn { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    width: 100%; text-align: left; background: none; border: 0;
+    border-bottom: 1px solid var(--rule2); border-left: 3px solid transparent;
+    padding: 13px 16px; font-family: var(--cond); font-size: 15px; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--ink2); }
+  .sheetbtn[data-on="1"] { border-left-color: var(--gold); color: var(--ink);
+    background: var(--bar); font-weight: 600; }
+  @keyframes sheetIn { from { transform: translateX(-8px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+
+.brand { padding: 0 18px 16px; border-bottom: 1px solid var(--rule); margin-bottom: 12px; }
+.brand h1 { font-family: var(--cond); font-size: 23px; margin: 0; font-weight: 700; letter-spacing: .02em; }
+.brand p { margin: 2px 0 0; font-size: 11px; color: var(--ink3); letter-spacing: .12em;
+  text-transform: uppercase; font-family: var(--cond); }
+
+.navbtn { display: block; width: 100%; text-align: left; background: none; border: 0;
+  border-left: 3px solid transparent; padding: 8px 16px; font-family: var(--cond); font-size: 13.5px;
+  letter-spacing: .05em; text-transform: uppercase; color: var(--ink2); }
+.navbtn:hover { background: var(--bar); color: var(--ink); }
+.navbtn[data-on="1"] { border-left-color: var(--gold); color: var(--ink); background: var(--bar); font-weight: 600; }
+.navbtn .tag { float: right; font-family: var(--mono); font-size: 10px; background: var(--out);
+  color: #fff; padding: 0 5px; border-radius: 8px; line-height: 16px; margin-top: 1px; }
+.side-foot { margin-top: auto; padding: 12px 16px 0; border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink3); }
+
+.eyebrow { font-family: var(--cond); text-transform: uppercase; letter-spacing: .12em; font-size: 11px; color: var(--ink3); font-weight: 600; }
+.h2 { font-family: var(--cond); font-size: 21px; font-weight: 700; margin: 0; }
+.h3 { font-family: var(--cond); font-size: 15px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; margin: 0; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.pos { color: var(--in); } .neg { color: var(--out); }
+.muted { color: var(--ink2); } .faint { color: var(--ink3); }
+
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: 3px; padding: 14px 16px; }
+.grid { display: grid; gap: 12px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+.btn { background: var(--card); border: 1px solid var(--rule); border-radius: 3px; padding: 6px 11px;
+  font-family: var(--cond); font-size: 13px; letter-spacing: .04em; text-transform: uppercase;
+  font-weight: 600; color: var(--ink2); }
+.btn:hover { border-color: var(--ink2); color: var(--ink); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn[data-v="primary"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn[data-v="gold"] { background: var(--gold); color: #fff; border-color: var(--gold); }
+.btn[data-v="danger"] { color: var(--out); border-color: #E0BDB8; }
+.btn[data-on="1"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.btn.sm { padding: 3px 8px; font-size: 11.5px; }
+
+.in { background: #fff; border: 1px solid var(--rule); border-radius: 3px; padding: 7px 9px; width: 100%; }
+.in:focus { border-color: var(--gold); }
+select.in { padding: 6px 6px; }
+label.f { display: block; }
+label.f > span { display: block; font-family: var(--cond); text-transform: uppercase; letter-spacing: .08em;
+  font-size: 10.5px; color: var(--ink3); margin-bottom: 3px; font-weight: 600; }
+
+table.ledger { width: 100%; border-collapse: collapse; }
+.ledger th { font-family: var(--cond); text-transform: uppercase; letter-spacing: .09em; font-size: 10.5px;
+  color: var(--ink2); text-align: left; padding: 5px 8px; border-bottom: 1.5px solid var(--ink);
+  font-weight: 600; white-space: nowrap; }
+.ledger td { padding: 6px 8px; border-bottom: 1px solid var(--rule2); vertical-align: middle; }
+.ledger tbody tr:nth-child(even) { background: var(--bar); }
+.ledger tbody tr:hover { background: #D6E5CF; }
+.ledger .r { text-align: right; }
+.scroll { overflow-x: auto; }
+
+/* The import review table carries eight columns, four of them editable. On a
+   phone that means the amount sits off the right edge, so stack each row into
+   a card instead: tick and amount on one line, narration under it, the four
+   controls wrapped below. */
+@media (max-width: 700px) {
+  table.prep, table.prep tbody, table.prep tr, table.prep td { display: block; width: 100%; }
+  table.prep thead { display: none; }
+  table.prep tbody tr { border-bottom: 1px solid var(--rule); padding: 8px 2px 10px; }
+  table.prep td { border: 0; padding: 2px 0; }
+  table.prep td:first-child { display: inline-block; width: auto; margin-right: 8px; vertical-align: middle; }
+  table.prep td:nth-child(2) { display: inline-block; width: auto; vertical-align: middle; }
+  table.prep td:last-child { display: inline-block; width: auto; float: right; font-size: 15px; font-weight: 600; }
+  table.prep td:nth-child(3) { clear: both; padding-top: 4px; max-width: none !important; }
+  table.prep td:nth-child(4), table.prep td:nth-child(5),
+  table.prep td:nth-child(6), table.prep td:nth-child(7) {
+    display: inline-block; width: auto; margin: 4px 6px 0 0;
+  }
+  table.prep td select, table.prep td input[type="text"] { width: auto !important; max-width: 46vw; }
+}
+
+.chip { display: inline-block; font-family: var(--cond); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: .06em; padding: 1px 6px; border-radius: 2px; border: 1px solid var(--rule);
+  background: var(--card); color: var(--ink2); font-weight: 600; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: 0 0 8px; }
+
+.stat { border-left: 3px solid var(--rule); padding-left: 10px; }
+.stat .k { font-family: var(--cond); text-transform: uppercase; letter-spacing: .09em; font-size: 10.5px;
+  color: var(--ink3); font-weight: 600; }
+.stat .v { font-family: var(--mono); font-size: 21px; font-weight: 500; letter-spacing: -.02em; }
+.stat .s { font-size: 11.5px; color: var(--ink2); }
+
+.rail { position: relative; padding: 22px 4px 4px; margin-top: 6px; }
+.rail:before { content: ''; position: absolute; left: 6px; right: 6px; top: 28px; height: 1px; background: var(--rule); }
+.rail-in { display: flex; justify-content: space-between; position: relative; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.ck { text-align: center; min-width: 74px; flex: 1; }
+.ck .p { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.ck .n { width: 9px; height: 9px; border-radius: 50%; background: var(--ink); margin: 3px auto;
+  border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--ink); }
+.ck[data-k="up"] .n { background: var(--in); box-shadow: 0 0 0 1px var(--in); }
+.ck[data-k="down"] .n { background: var(--out); box-shadow: 0 0 0 1px var(--out); }
+.ck .d { font-family: var(--cond); font-size: 10px; color: var(--ink3); letter-spacing: .05em; text-transform: uppercase; }
+.ck .g { font-family: var(--mono); font-size: 10.5px; }
+
+.modal-bg { position: fixed; inset: 0; background: rgba(20,35,26,.42); display: flex;
+  align-items: flex-start; justify-content: center; padding: 26px 12px; z-index: 60; overflow-y: auto; }
+.modal { background: var(--paper); border: 1px solid var(--ink); border-radius: 3px; max-width: 640px;
+  width: 100%; box-shadow: 0 18px 40px rgba(20,35,26,.25); }
+.modal-h { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
+  border-bottom: 1px solid var(--rule); }
+.modal-b { padding: 16px; }
+
+.bar-track { height: 7px; background: var(--rule2); border-radius: 2px; overflow: hidden; }
+.bar-fill { height: 100%; }
+.hr { height: 1px; background: var(--rule); border: 0; margin: 14px 0; }
+.empty { text-align: center; padding: 34px 16px; color: var(--ink2); }
+.empty .h3 { margin-bottom: 6px; color: var(--ink); }
+.toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--ink);
+  color: var(--paper); padding: 9px 16px; border-radius: 3px; z-index: 80; font-size: 13px;
+  box-shadow: 0 8px 24px rgba(20,35,26,.3); }
+.fade { animation: up .32s ease both; }
+@keyframes up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+.auth { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.auth-box { width: 100%; max-width: 380px; }
+.heat td.cell { font-family: var(--mono); text-align: right; font-size: 12px; }
+
+
+/* Safari on iOS zooms the whole page in when a focused field's text is smaller
+   than 16px, and back out when it loses focus — the page appearing to swell and
+   shrink as you tab through a form. There is no way to opt out of the behaviour
+   short of disabling pinch-zoom, which is worse, so the fix is to keep every
+   field at or above the threshold on touch devices. The compact sizes are kept
+   for mouse pointers, where nothing zooms.
+   !important is needed because several of these fields carry inline sizes. */
+@media (pointer: coarse) {
+  .in, input, select, textarea { font-size: 16px !important; }
+  /* 16px text needs more room than the compact widths allowed for. */
+  .ledger .in, table .in { min-width: 5.5em; }
+}

@@ -1,0 +1,37 @@
+{
+  "name": "khata-book",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Household expense ledger: statements in, categorised spending, reimbursement claims, investments and net worth.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c green,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "node --watch server/index.js",
+    "dev:web": "vite",
+    "build": "vite build",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.2.0",
+    "papaparse": "^5.4.1",
+    "pdfjs-dist": "^4.10.38",
+    "pg": "^8.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "recharts": "^2.15.0",
+    "vite": "^6.0.7"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
